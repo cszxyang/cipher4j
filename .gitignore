@@ -1,0 +1,62 @@
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+# Compiled class file
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+# *.jar
+# *.war
+# *.ear
+# *.zip
+# *.tar.gz
+# *.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# maven
+/**/target
+
+# idea
+/**/.idea
+/**/mvnw
+/**/mvnw.cmd
+/out
+/**/*.iml
+*.ipr
+*.iws
+/**/.mvn/
+
+# IDEA metadata and output dirs
+# eclipse
+.settings
+.project
+.classpath
+.log
+
+# Package Files
+*.bak
+*.tmp
+/bin
+
+!webapp/WEB-INF/web.xml
+webapp/
+
+# windows
+Thumbs.db
+
+# Mac
+.DS_Store
