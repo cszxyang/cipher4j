@@ -1,7 +1,8 @@
 package org.jordon.security.core;
 
+import org.jordon.security.constant.DESConstants;
 import org.jordon.security.util.ArrayUtil;
-
+import org.jordon.security.util.Base64Util;
 import java.io.UnsupportedEncodingException;
 
 public class DesService implements CipherService {
@@ -11,34 +12,39 @@ public class DesService implements CipherService {
      * @param plaintext text to be encrypted
      * @param key key
      * @return encrypted text
-     * @throws UnsupportedEncodingException coursed by String.getBytes()
+     * @throws UnsupportedEncodingException caused by String.getBytes()
      */
     @Override
     public String encrypt(String plaintext, String key) throws UnsupportedEncodingException {
+        ArrayUtil.printInfo("plaintext", plaintext, false);
+        ArrayUtil.printInfo("keyText", key, true);
+
         char[] plaintextBytes = ArrayUtil.bytesToChars(
                 plaintext.getBytes("UTF-8"));
         char[] keyBytes = ArrayUtil.bytesToChars(
                 key.getBytes("UTF-8"));
-        char[] result = encode(plaintextBytes, keyBytes);
 
-        ArrayUtil.printBitChars("plaintext", plaintextBytes);
-        ArrayUtil.printBitChars("key", keyBytes);
-        ArrayUtil.printBitChars("encrypted text bits", result);
-        ArrayUtil.segmentAndPrintChars("encrypted text", result);
-        return null;
+        ArrayUtil.printBitChars("plaintext bits", plaintextBytes);
+        ArrayUtil.printBitChars("key bits", keyBytes);
+
+        char[][] subKeys = generateSubKeys(keyBytes);
+        char[] result = encode(plaintextBytes, subKeys);
+        String encryptedText = Base64Util.encode(result);
+
+        ArrayUtil.printBitChars("encryptedText bits", result);
+        ArrayUtil.printInfo("encryptedText", encryptedText, true);
+        return encryptedText;
     }
 
     /**
      * main encryption logic
      * @param plaintextBytes plaintext bits in chars format
-     * @param keyBytes key bits in chars format
+     * @param subKeys subKeys bits in chars format
      * @return encryption result bits in chars format
      */
-    private char[] encode(char[] plaintextBytes, char[] keyBytes) {
-        char[][] subKeys = generateSubKeys(keyBytes);
-
+    private char[] encode(char[] plaintextBytes, char[][] subKeys) {
         // initial permutation, get 64 bit disrupted array
-        char[] chars = ArrayUtil.disruptArray(plaintextBytes, Constants.IP);
+        char[] chars = ArrayUtil.disruptArray(plaintextBytes, DESConstants.IP);
         ArrayUtil.printBitChars("plaintext after ip", chars);
 
         int length = chars.length;
@@ -69,7 +75,46 @@ public class DesService implements CipherService {
         }
 
         char[] calResult = ArrayUtil.concat(right, left);
-        return ArrayUtil.disruptArray(calResult, Constants.inverseIP);
+        return ArrayUtil.disruptArray(calResult, DESConstants.inverseIP);
+    }
+
+    /**
+     * decrypt encrypted text with key
+     * @param encryptedText encrypted text
+     * @param key key
+     * @return decrypted origin plaintext
+     * @throws UnsupportedEncodingException caused by String.getBytes()
+     */
+    @Override
+    public String decrypt(String encryptedText, String key) throws UnsupportedEncodingException {
+        ArrayUtil.printInfo("encryptedText", encryptedText, false);
+        ArrayUtil.printInfo("key", key, true);
+
+        char[] encryptedTextBytes = Base64Util.decode(encryptedText);
+        char[] keyBytes = ArrayUtil.bytesToChars(
+                key.getBytes("UTF-8"));
+
+        char[][] inverseKeys = inverseSubKeys(generateSubKeys(keyBytes));
+        char[] result = encode(encryptedTextBytes, inverseKeys);
+
+        ArrayUtil.printBitChars("encryptedText bits", encryptedTextBytes);
+        ArrayUtil.printBitChars("key", keyBytes);
+        ArrayUtil.printBitChars("decryptedText bits", result);
+        return ArrayUtil.segmentAndPrintChars("decrypt plaintext text", result);
+    }
+
+    /**
+     * change over the sub keys for reusing the encode function
+     * @param subKeys origin subKeys
+     * @return  inverse subKeys
+     */
+    private char[][] inverseSubKeys(char[][] subKeys) {
+        char[][] inverseKeys = new char[subKeys.length][];
+
+        for (int i = 0; i < subKeys.length; i++) {
+            inverseKeys[i] = subKeys[subKeys.length - 1 - i];
+        }
+        return inverseKeys;
     }
 
     /**
@@ -85,7 +130,7 @@ public class DesService implements CipherService {
         //    get 48-bit extended array
         System.out.println("coreEncrypting");
         ArrayUtil.printBitChars("32-bit input", right);
-        char[] extendedRight = ArrayUtil.disruptArray(right, Constants.E);
+        char[] extendedRight = ArrayUtil.disruptArray(right, DESConstants.E);
         ArrayUtil.printBitChars("Selection", extendedRight);
         ArrayUtil.printBitChars("subKey", subKey);
 
@@ -109,13 +154,13 @@ public class DesService implements CipherService {
             int rowIndex = Integer.parseInt(String.valueOf(rowBits), 2);
             int columnIndex = Integer.parseInt(String.valueOf(columnBits), 2);
 
-            short output = Constants.SUBSTITUTE_BOX[i][rowIndex][columnIndex];
+            short output = DESConstants.SUBSTITUTE_BOX[i][rowIndex][columnIndex];
             outputBuilder.append(Integer.toBinaryString((output & 0x0f) + 0x10).substring(1));
         }
         char[] substitutedResult = outputBuilder.toString().toCharArray();
         ArrayUtil.printBitChars("SBox", substitutedResult);
         // 4. replacement through P array, returns 28-bit array
-        return ArrayUtil.disruptArray(substitutedResult, Constants.P);
+        return ArrayUtil.disruptArray(substitutedResult, DESConstants.P);
     }
 
     /**
@@ -126,34 +171,30 @@ public class DesService implements CipherService {
     private char[][] generateSubKeys(char[] keyBytes) {
         char[][] subKeys = new char[16][48];
         // Replacement and selection 1
-        char[] c = ArrayUtil.disruptArray(keyBytes, Constants.replace1C);
+        char[] c = ArrayUtil.disruptArray(keyBytes, DESConstants.replace1C);
         ArrayUtil.printBitChars("Replacement 1 C", c);
-        char[] d = ArrayUtil.disruptArray(keyBytes, Constants.replace1D);
+        char[] d = ArrayUtil.disruptArray(keyBytes, DESConstants.replace1D);
         ArrayUtil.printBitChars("Replacement 1 D", d);
+        System.out.println();
 
         // loop left shifting
         for (int i = 0; i < 16; i++) {
-            c = ArrayUtil.leftShift(c, Constants.moveBit[i]);
-            ArrayUtil.printBitChars((i + 1) + " leftShifting C", c);
-            d = ArrayUtil.leftShift(d, Constants.moveBit[i]);
-            ArrayUtil.printBitChars((i + 1) + " leftShifting D", d);
+            c = ArrayUtil.leftShift(c, DESConstants.moveBit[i]);
+            ArrayUtil.printBitChars("[" + (i + 1) + "]" + " leftShifting C", c);
+            d = ArrayUtil.leftShift(d, DESConstants.moveBit[i]);
+            ArrayUtil.printBitChars("[" + (i + 1) + "]" + " leftShifting D", d);
 
             // 56 bit concat
             char[] concatChars = ArrayUtil.concat(c, d);
-            ArrayUtil.printBitChars((i + 1) + " concatChars", concatChars);
+            ArrayUtil.printBitChars("[" + (i + 1) + "]" + " concatChars", concatChars);
 
             // Replacement and selection 2, get 48 bit array
-            char[] key = ArrayUtil.disruptArray(concatChars, Constants.replace2);
+            char[] key = ArrayUtil.disruptArray(concatChars, DESConstants.replace2);
             subKeys[i] = key;
-            String prefix = "subKey[" + (i + 1) + "]";
+            String prefix = "[" + (i + 1) + "] subKey";
             ArrayUtil.printBitChars(prefix, key);
             System.out.println();
         }
         return subKeys;
-    }
-
-    @Override
-    public String decrypt(String encryptedText, String key) {
-        return null;
     }
 }

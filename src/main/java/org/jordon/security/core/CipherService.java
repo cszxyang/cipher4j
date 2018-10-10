@@ -17,5 +17,5 @@ public interface CipherService {
      * @param key key
      * @return origin plaintext
      */
-    String decrypt(String encryptedText, String key);
+    String decrypt(String encryptedText, String key) throws UnsupportedEncodingException;
 }

@@ -1,6 +1,54 @@
 package org.jordon.security.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ArrayUtil {
+
+    /**
+     * print information for tracing the whole process
+     * @param key info type
+     * @param value info
+     * @param nextRow flag deciding whether going to next row
+     */
+    public static void printInfo(String key, String value, boolean nextRow) {
+        System.out.println(String.format("%-30s%-30s", key, value));
+        if (nextRow) {
+            System.out.println();
+        }
+    }
+
+    /**
+     * concatenate two byte arrays
+     * @param before the first array in concat
+     * @param after the second array in concat
+     * @return concat
+     */
+    static byte[] concat(byte[] before, byte[] after) {
+        byte[] result = new byte[before.length + after.length];
+        System.arraycopy(before, 0, result, 0, before.length);
+        System.arraycopy(after, 0, result, before.length, after.length);
+        return result;
+    }
+
+    /**
+     * transfer int value into byte array
+     * @param intValue int value
+     * @return byte array
+     */
+    static byte[] int2Bytes(int intValue) {
+        byte[] byteArray = null;
+        try {
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            DataOutputStream dataOut = new DataOutputStream(byteOut);
+            dataOut.writeByte(intValue);
+            byteArray = byteOut.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return byteArray;
+    }
 
     /**
      * segment one-dimension array into an 8x8 array
@@ -9,13 +57,14 @@ public class ArrayUtil {
      * @param prefix info
      * @param chars char array to be processed
      */
-    public static void segmentAndPrintChars(String prefix, char[] chars) {
+    public static String segmentAndPrintChars(String prefix, char[] chars) {
         char[][] chars1 = ArrayUtil.segmentDimension(chars, 8 ,8);
         StringBuilder builder = new StringBuilder();
         for (char[] aChars1 : chars1) {
             builder.append((char) Integer.parseInt(String.valueOf(aChars1), 2));
         }
         System.out.println(String.format("%-30s%-30s", prefix, builder.toString()));
+        return builder.toString();
     }
 
     /**
@@ -39,7 +88,7 @@ public class ArrayUtil {
      * @param newIndexes index array the disruption is according to
      * @return disrupted sub array of chars
      */
-    public static char[] disruptArray(char[] chars, int[] newIndexes) {
+    public static char[] disruptArray(char[] chars, short[] newIndexes) {
         char[] resultChars = new char[newIndexes.length];
         for (int i = 0; i < newIndexes.length; i++) {
             resultChars[i] = chars[newIndexes[i] - 1];
@@ -133,7 +182,7 @@ public class ArrayUtil {
     }
 
     /**
-     * concatenate to arrays after left shifting in loop
+     * concatenate two arrays after left shifting in loop
      * @param before the first array in concat
      * @param after  the second array in concat
      * @return concat

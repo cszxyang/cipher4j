@@ -7,13 +7,25 @@ import org.jordon.security.core.DesService;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-{
+public class AppTest {
+
+    @Test
+    public void testService() {
+        CipherService cipherService = new DesService();
+        try {
+            String encryptedText = cipherService.encrypt("01234567", "12345678");
+            cipherService.decrypt(encryptedText,"12345678");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Rigorous Test :-)
      */
@@ -74,56 +86,6 @@ public class AppTest
         return isPrime;
     }
 
-    @Test
-    public void test1() {
-        System.out.println(test2(403, 1.375f));
-    }
-
-    private double R = 8.314f, a = 9387900, b = 90.460f;
-
-    private double test2(int T, float P) {
-        for (int V = 0 ; V < 500000 ; V ++) {
-            int p = statusCal(T, V);
-            System.out.println(p);
-            if ((int)P == p)
-                return V;
-        }
-        return 0;
-    }
-
-    private int statusCal(int T, int V) {
-        return (int) (R * T / (V - b) -
-                                a / (V * (V + b) + b * (V - b)));
-    }
-
-    private double test(double T, double P) {
-        double V, Z = 1, V1, Z1, fv, _fv;
-
-        for ( ; ; ) {
-            V = Z * R * T / P;
-            fv = fv(P, T, V);
-            _fv = _fv(T, V);
-
-            V1 = V - fv / _fv;
-            Z1 = P * V1 / (R * T);
-            if (Math.abs(Z1 - Z) < 0.0001) {
-                return Z * R * T / P;
-            }else {
-                Z = Z1;
-            }
-        }
-    }
-
-    private double fv(double P, double T, double V) {
-        return  P + a / (Math.sqrt(T) * V * (V + b)) - R * T / (V - b);
-    }
-
-    private double _fv(double T, double V) {
-        return R * T / ((V - b) * (V - b)) - a * (2 * V + b)
-                / (Math.sqrt(T) * V * V * (V + b) * (V + b));
-    }
-
-
     private static long[] ex_gcd(long a, long b) {
         long ans;
         long[] result = new long[3];
@@ -151,12 +113,10 @@ public class AppTest
     }
 
     @Test
-    public void testService() {
-        CipherService cipherService = new DesService();
-        try {
-            cipherService.encrypt("01234567", "12345678");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    public void test() {
+        char[] chars = new char[3];
+        chars[0] = '1';
+        chars[2] = 'i';
+        System.out.println(Arrays.toString(chars));
     }
 }
