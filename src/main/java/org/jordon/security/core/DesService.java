@@ -57,10 +57,11 @@ public class DesService implements CipherService {
         ArrayUtil.printBitChars("R0", right);
 
         for (int i = 0; i < 16; i++) {
-            System.out.println("N = " + (i + 1));
+            System.out.println();
 
             coreEncrypted = coreEncrypt(right, subKeys[i]);
-            ArrayUtil.printBitChars("P Replacement", coreEncrypted);
+            ArrayUtil.printBitChars("[F] " +
+                                "P Replacement", coreEncrypted);
 
             // get 32-bit array
             xorResult = String.valueOf(ArrayUtil.xor(left, coreEncrypted))
@@ -69,11 +70,10 @@ public class DesService implements CipherService {
             left = right;
             right = xorResult;
 
-            ArrayUtil.printBitChars("left", left);
-            ArrayUtil.printBitChars("right", right);
-            System.out.println();
+            ArrayUtil.printBitChars("["  + (i + 1) +  "] " + "left", left);
+            ArrayUtil.printBitChars("["  + (i + 1) +  "] " + "right", right);
         }
-
+        System.out.println();
         char[] calResult = ArrayUtil.concat(right, left);
         return ArrayUtil.disruptArray(calResult, DESConstants.inverseIP);
     }
@@ -98,7 +98,7 @@ public class DesService implements CipherService {
         char[] result = encode(encryptedTextBytes, inverseKeys);
 
         ArrayUtil.printBitChars("encryptedText bits", encryptedTextBytes);
-        ArrayUtil.printBitChars("key", keyBytes);
+        ArrayUtil.printBitChars("key bits", keyBytes);
         ArrayUtil.printBitChars("decryptedText bits", result);
         return ArrayUtil.segmentAndPrintChars("decrypt plaintext text", result);
     }
@@ -128,15 +128,14 @@ public class DesService implements CipherService {
     private char[] coreEncrypt(char[] right, char[] subKey) {
         // 1. do selection for 32-bit right disrupted info
         //    get 48-bit extended array
-        System.out.println("coreEncrypting");
-        ArrayUtil.printBitChars("32-bit input", right);
+        ArrayUtil.printBitChars("[F] 32-bit input", right);
         char[] extendedRight = ArrayUtil.disruptArray(right, DESConstants.E);
-        ArrayUtil.printBitChars("Selection", extendedRight);
-        ArrayUtil.printBitChars("subKey", subKey);
+        ArrayUtil.printBitChars("[F] Selection", extendedRight);
+        ArrayUtil.printBitChars("[F] subKey", subKey);
 
         // 2. xor 48-bit extendedRight and 48-bit subKey
         char[] xorResult = ArrayUtil.xor(extendedRight, subKey);
-        ArrayUtil.printBitChars("xor", xorResult);
+        ArrayUtil.printBitChars("[F] xor", xorResult);
 
         // 3. substitute box mixing and confusing
         // (1) format 48-bit one-dimension array into an 8x6 matrix
@@ -158,7 +157,7 @@ public class DesService implements CipherService {
             outputBuilder.append(Integer.toBinaryString((output & 0x0f) + 0x10).substring(1));
         }
         char[] substitutedResult = outputBuilder.toString().toCharArray();
-        ArrayUtil.printBitChars("SBox", substitutedResult);
+        ArrayUtil.printBitChars("[F] SBox", substitutedResult);
         // 4. replacement through P array, returns 28-bit array
         return ArrayUtil.disruptArray(substitutedResult, DESConstants.P);
     }
@@ -175,7 +174,7 @@ public class DesService implements CipherService {
         ArrayUtil.printBitChars("Replacement 1 C", c);
         char[] d = ArrayUtil.disruptArray(keyBytes, DESConstants.replace1D);
         ArrayUtil.printBitChars("Replacement 1 D", d);
-        System.out.println();
+        System.out.println("\nStart to generate sub keys......");
 
         // loop left shifting
         for (int i = 0; i < 16; i++) {
