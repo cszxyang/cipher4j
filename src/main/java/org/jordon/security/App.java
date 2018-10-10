@@ -1,4 +1,4 @@
-package org.jordon;
+package org.jordon.security;
 
 /**
  * app entry
