@@ -3,7 +3,7 @@ package org.jordon.security;
 import static org.junit.Assert.assertTrue;
 
 import org.jordon.security.core.CipherService;
-import org.jordon.security.core.DesService;
+import org.jordon.security.core.DESCipherService;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -17,10 +17,11 @@ public class AppTest {
 
     @Test
     public void testService() {
-        CipherService cipherService = new DesService();
+        String plaintext = "01234567", key = "12345678";
+        CipherService cipherService = new DESCipherService();
         try {
-            String encryptedText = cipherService.encrypt("01234567", "12345678");
-            cipherService.decrypt(encryptedText,"12345678");
+            String encryptedText = cipherService.encrypt(plaintext, key);
+            cipherService.decrypt(encryptedText,key);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

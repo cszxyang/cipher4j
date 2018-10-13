@@ -5,7 +5,7 @@ import org.jordon.security.util.ArrayUtil;
 import org.jordon.security.util.Base64Util;
 import java.io.UnsupportedEncodingException;
 
-public class DesService implements CipherService {
+public class DESCipherService implements CipherService {
 
     /**
      * encrypt plaintext with key
@@ -60,7 +60,7 @@ public class DesService implements CipherService {
             System.out.println();
 
             coreEncrypted = coreEncrypt(right, subKeys[i]);
-            ArrayUtil.printBitChars("[F] " +
+            ArrayUtil.printBitChars("[f] " +
                                 "P Replacement", coreEncrypted);
 
             // get 32-bit array
@@ -128,17 +128,17 @@ public class DesService implements CipherService {
     private char[] coreEncrypt(char[] right, char[] subKey) {
         // 1. do selection for 32-bit right disrupted info
         //    get 48-bit extended array
-        ArrayUtil.printBitChars("[F] 32-bit input", right);
+        ArrayUtil.printBitChars("[f] 32-bit input", right);
         char[] extendedRight = ArrayUtil.disruptArray(right, DESConstants.E);
-        ArrayUtil.printBitChars("[F] Selection", extendedRight);
-        ArrayUtil.printBitChars("[F] subKey", subKey);
+        ArrayUtil.printBitChars("[f] Selection", extendedRight);
+        ArrayUtil.printBitChars("[f] subKey", subKey);
 
         // 2. xor 48-bit extendedRight and 48-bit subKey
         char[] xorResult = ArrayUtil.xor(extendedRight, subKey);
-        ArrayUtil.printBitChars("[F] xor", xorResult);
+        ArrayUtil.printBitChars("[f] xor", xorResult);
 
         // 3. substitute box mixing and confusing
-        // (1) format 48-bit one-dimension array into an 8x6 matrix
+        // (1) format 1x48 matrix into an 8x6 matrix
         char[][] twoDimensionArray = ArrayUtil.segmentDimension(xorResult, 8, 6);
         StringBuilder outputBuilder = new StringBuilder();
         for (int i = 0; i < twoDimensionArray.length; i++) {
@@ -149,31 +149,31 @@ public class DesService implements CipherService {
                             twoDimensionArray[i][3], twoDimensionArray[i][4]
                     };
 
-            // obtain the index of output value in SUBSTITUTE_BOX[i]
+            // (2) obtain the index of output value in SUBSTITUTE_BOX[i]
             int rowIndex = Integer.parseInt(String.valueOf(rowBits), 2);
             int columnIndex = Integer.parseInt(String.valueOf(columnBits), 2);
-
+            // (3) obtain output of Si
             short output = DESConstants.SUBSTITUTE_BOX[i][rowIndex][columnIndex];
             outputBuilder.append(Integer.toBinaryString((output & 0x0f) + 0x10).substring(1));
         }
         char[] substitutedResult = outputBuilder.toString().toCharArray();
         ArrayUtil.printBitChars("[F] SBox", substitutedResult);
-        // 4. replacement through P array, returns 28-bit array
+        // 4. replacement P, returns 28-bit array
         return ArrayUtil.disruptArray(substitutedResult, DESConstants.P);
     }
 
     /**
-     * generate 16 46-bit sub keys
+     * generate 16 48-bit sub keys
      * @param keyBytes origin key bits in chars format
      * @return 16-elements subKey array
      */
     private char[][] generateSubKeys(char[] keyBytes) {
         char[][] subKeys = new char[16][48];
         // Replacement and selection 1
-        char[] c = ArrayUtil.disruptArray(keyBytes, DESConstants.replace1C);
-        ArrayUtil.printBitChars("Replacement 1 C", c);
-        char[] d = ArrayUtil.disruptArray(keyBytes, DESConstants.replace1D);
-        ArrayUtil.printBitChars("Replacement 1 D", d);
+        char[] c = ArrayUtil.disruptArray(keyBytes, DESConstants.PERMUTED_CHOICE_1_C0);
+        ArrayUtil.printBitChars("Permuted Choice 1 C0", c);
+        char[] d = ArrayUtil.disruptArray(keyBytes, DESConstants.PERMUTED_CHOICE_1_D0);
+        ArrayUtil.printBitChars("Permuted Choice 1 D0", d);
         System.out.println("\nStart to generate sub keys......");
 
         // loop left shifting
