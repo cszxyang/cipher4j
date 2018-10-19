@@ -20,9 +20,9 @@ public class DESCipherService implements CipherService {
         ArrayUtil.printInfo("keyText", key, true);
 
         char[] plaintextBytes = ArrayUtil.bytesToChars(
-                plaintext.getBytes("UTF-8"));
+                                    plaintext.getBytes("UTF-8"));
         char[] keyBytes = ArrayUtil.bytesToChars(
-                key.getBytes("UTF-8"));
+                            key.getBytes("UTF-8"));
 
         ArrayUtil.printBitChars("plaintext bits", plaintextBytes);
         ArrayUtil.printBitChars("key bits", keyBytes);
@@ -65,7 +65,7 @@ public class DESCipherService implements CipherService {
 
             // get 32-bit array
             xorResult = String.valueOf(ArrayUtil.xor(left, coreEncrypted))
-                    .substring(16).toCharArray();
+                                .substring(16).toCharArray();
 
             left = right;
             right = xorResult;
@@ -92,7 +92,7 @@ public class DESCipherService implements CipherService {
 
         char[] encryptedTextBytes = Base64Util.decode(encryptedText);
         char[] keyBytes = ArrayUtil.bytesToChars(
-                key.getBytes("UTF-8"));
+                            key.getBytes("UTF-8"));
 
         char[][] inverseKeys = inverseSubKeys(generateSubKeys(keyBytes));
         char[] result = encode(encryptedTextBytes, inverseKeys);
@@ -142,12 +142,15 @@ public class DESCipherService implements CipherService {
         char[][] twoDimensionArray = ArrayUtil.segmentDimension(xorResult, 8, 6);
         StringBuilder outputBuilder = new StringBuilder();
         for (int i = 0; i < twoDimensionArray.length; i++) {
-            char[] rowBits = {twoDimensionArray[i][0], twoDimensionArray[i][5]};
-            char[] columnBits =
-                    {
-                            twoDimensionArray[i][1], twoDimensionArray[i][2],
-                            twoDimensionArray[i][3], twoDimensionArray[i][4]
-                    };
+
+            char[] rowBits = {
+                    twoDimensionArray[i][0],
+                    twoDimensionArray[i][5]
+            };
+            char[] columnBits = {
+                    twoDimensionArray[i][1], twoDimensionArray[i][2],
+                    twoDimensionArray[i][3], twoDimensionArray[i][4]
+            };
 
             // (2) obtain the index of output value in SUBSTITUTE_BOX[i]
             int rowIndex = Integer.parseInt(String.valueOf(rowBits), 2);
