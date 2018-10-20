@@ -90,7 +90,7 @@ public class DESCipherService implements CipherService {
         ArrayUtil.printInfo("encryptedText", encryptedText, false);
         ArrayUtil.printInfo("key", key, true);
 
-        char[] encryptedTextBytes = Base64Util.decode(encryptedText);
+        char[] encryptedTextBytes = Base64Util.decodeToChars(encryptedText);
         char[] keyBytes = ArrayUtil.bytesToChars(
                             key.getBytes("UTF-8"));
 

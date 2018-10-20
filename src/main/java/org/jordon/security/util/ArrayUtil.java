@@ -7,6 +7,22 @@ import java.io.IOException;
 public class ArrayUtil {
 
     /**
+     * 将字符串转为一维short数组
+     * transfer a string to short array
+     * @param string target string to be process
+     * @return a short array
+     */
+    public static short[] transferToShorts(String string) {
+        byte[] bytes = string.getBytes();
+        int length = bytes.length;
+        short[] shorts = new short[length];
+        for (int i = 0; i < length; i++) {
+            shorts[i] = bytes[i];
+        }
+        return shorts;
+    }
+
+    /**
      * print information for tracing the whole process
      * @param key info type
      * @param value info
@@ -80,6 +96,14 @@ public class ArrayUtil {
             builder.append(aByteStr);
         }
         return builder.toString().toCharArray();
+    }
+
+    public static short[] byteToShorts(byte[] bytes) {
+        short[] result = new short[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            result[i] = (short) (bytes[i] & 0xff);
+        }
+        return result;
     }
 
     /**

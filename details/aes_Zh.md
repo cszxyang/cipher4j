@@ -22,94 +22,549 @@
 
 ## 加密过程
 
-// todo
+### 生成轮密钥
+
+```java
+/**
+ * 轮密钥扩展：将1个状态长度的主密钥扩展成<tt>rounds + 1</tt>个状态长度的轮密钥数组
+ * generation of round keys
+ * @param originalKey original cipher key
+ * @return round keys
+ */
+private short[][] generateRoundKeys(short[][] originalKey) {
+    short[][] roundKeys = new short[44][4];
+    int keyWordCount = originalKey.length;
+    // 1. copy the original cipher words into the first four words of the roundKeys
+    System.arraycopy(originalKey, 0, roundKeys, 0, keyWordCount);
+    // 2. extension from previous word
+    for (int i = keyWordCount; i < keyWordCount * 11; i++) {
+        short[] temp = roundKeys[i - 1];
+        if (i % keyWordCount == 0) {
+            temp = xor(substituteWord(leftShift(temp)), AESConstants.R_CON[i / keyWordCount]);
+        }
+        roundKeys[i] = xor(roundKeys[i - keyWordCount], temp);
+    }
+    return roundKeys;
+}
+```
+
+
+
+### 对外加密接口
+
+```java
+public String encrypt(String plaintext, String key) {
+    // transfer plaintext and key from one-dimension matrix
+    // to (data.length / 4) x 4 matrix
+    short[][] initialPTState = transfer(transferToShorts(plaintext));
+    short[][] initialKeyState = transfer(transferToShorts(key));
+
+    // obtain raw round keys
+    short[][] rawRoundKeys = generateRoundKeys(initialKeyState);
+
+    // make it easier to obtain a whole block of round key in a round transformation
+    short[][][] roundKeys = transfer(rawRoundKeys);
+    
+    short[][] finalState = coreEncrypt(initialPTState, roundKeys, AESConstants.SUBSTITUTE_BOX,
+                                       AESConstants.CX, AESConstants.SHIFTING_TABLE);
+    return Base64Util.encode(transfer2Bytes(finalState));
+}
+```
+
+
+
+### 核心加密逻辑
+
+```java
+/**
+ * AES核心操作，通过将可逆操作抽取成可逆矩阵作为参数，使该方法能在加/解密操作中复用
+ * @param initialPTState    明文或密文的状态数组
+ * @param roundKeys     加/解密要用到的轮密钥数组
+ * @param substituteTable   加/解密要用到的S盒
+ * @param mixColumnTable    列混合中用来取代既约多项式的数组
+ * @param shiftingTable    行变换中用来决定字间左移的位数的数组
+ * @return 加/解密结果
+ */
+private short[][] coreEncrypt(short[][] initialPTState,
+                              short[][][] roundKeys, short[][] substituteTable,
+                              short[][] mixColumnTable, short[][] shiftingTable) {
+
+    // 初始轮密钥加，异或操作
+    short[][] state = xor(roundKeys[0], initialPTState);
+
+    // 处理前九轮变换
+    for (int i = 0; i < 9; i++) {
+        // 将状态数组的字节替换为S盒中相应位置的字节
+        state = substituteState(state, substituteTable);
+        // 行移位变换
+        state = shiftRows(state, shiftingTable);
+        // 列混合变换
+        state = mixColumns(state, mixColumnTable);
+        // 轮密钥加变换
+        state = xor(roundKeys[i + 1], state);
+    }
+
+    // 处理最后一轮
+    state = substituteState(state, substituteTable);
+    state = shiftRows(state, shiftingTable);
+    state = xor(roundKeys[roundKeys.length - 1], state);
+    return state;
+}
+```
+
+
+
+#### 有限域GF(2)上的加法
+
+```java
+/**
+ * 有限域GF(2)上的加法，<tt>modeSize</tt>位的异或操作
+ * xor corresponding byte in two state arrays
+ * @param first first operand
+ * @param second second operand
+ * @return xor result
+ */
+private short[][] xor(short[][] first, short[][] second) {
+    short[][] result = new short[first.length][4];
+    int length = first.length;
+    for (short i = 0; i < length; i++) {
+        for (short j = 0; j < length; j++) {
+            result[i][j] = (short) (first[i][j] ^ second[i][j]);
+        }
+    }
+    return result;
+}
+```
+
+
+
+#### 字节替代
+
+```java
+/**
+ * 状态替代：对状态中的每个字进行字替代
+ * substitute value of a state array using byte as unit
+ * @param state state array to be substituted
+ * @return substitution result, a new state array
+ */
+private short[][] substituteState(short[][] state, short[][] substituteTable) {
+    for (int i = 0; i < state.length; i++) {
+        for (int j = 0; j < 4 ; j++) {
+            state[i][j] = substituteByte(state[i][j], substituteTable);
+        }
+    }
+    return state;
+}
+
+/**
+ * 字替代：对字中每个字节进行字节替代
+ * substitute all bytes in a word through SBox
+ * @param aWord a word, aka 4 bytes
+ * @return substitution result, a new and disrupted word
+ */
+private short[] substituteWord(short[] aWord) {
+    for (int i = 0; i < 4; i++) {
+        aWord[i] = substituteByte(aWord[i], AESConstants.SUBSTITUTE_BOX);
+    }
+    return aWord;
+}
+
+/**
+ * 字节替代： 取一个字的高四位和低四位分别作为S盒的行号和列号，
+ *          通过行列号取S盒中的字节替代原字节
+ * substitute value of a byte through <tt>SBox</tt>
+ * @param originalByte byte to be substituted
+ * @return substitution result, a new byte
+ */
+private short substituteByte(short originalByte, short[][] substituteTable) {
+    // low 4 bits in a originByte
+    int low4Bits = originalByte & 0x000f;
+    // high 4 bits in a originByte
+    int high4Bits = (originalByte >> 4) & 0x000f;
+    // obtain value in <tt>AESConstants.SUBSTITUTE_BOX</tt>
+    return substituteTable[high4Bits][low4Bits];
+}
+```
+
+
+
+#### 行移位变换
+
+```java
+/**
+ * 行移位变换：对状态的行进行循环左移，左移规则在<tt>shiftingTable</tt>中定义
+ * row shifting operation, rotate over N which is defined in
+ * <tt>AESConstants.SHIFTING_TABLE</tt> bytes of corresponding rows
+ * @param state state array of the original plaintext
+ * @return a new state array
+ */
+private static short[][] shiftRows(short[][] state, short[][] shiftingTable) {
+    short[][] result = new short[state.length][4];
+    for (int j = 0; j < 4; j++) {  // local byte in a word
+        for (int i = 0; i < state.length; i++) {  // local word
+            result[i][j] = state[shiftingTable[i][j]][j];
+        }
+    }
+    return result;
+}
+```
+
+
+
+#### 列混合变换
+
+```java
+/**
+ * 列混合变换：状态数组与多项式等价矩阵进行有限域GF(2)上的矩阵乘法
+ * @param state 状态数组
+ * @param table 多项式等价矩阵
+ * @return 列混合变换后的新状态
+ */
+private short[][] mixColumns(short[][] state, short[][] table) {
+    short[][] result = new short[state.length][4];
+    for (int i = 0; i < state.length; i++) {
+        result[i] = matrixMultiply(state[i], table);
+    }
+    return result;
+}
+
+/**
+ * 一个字与多项式等价数组在有限域GF(2)上的乘法操作
+ * multiplication between a word of a state and a irreducible
+ * polynomial <tt>C(x)=03x^3+01x^2+01^2+01x+02</tt> which is replaced as a
+ * constant table <tt>AESConstants.CX</tt>
+ * (aes-128: 4x4 x 4x1 = 4x1)
+ * @param aWord a word of a state
+ * @return multiplication result, a new word
+ */
+private short[] matrixMultiply(short[] aWord, short[][] table) {
+    short[] result = new short[4];
+    for (int i = 0; i < 4; i++) {
+        result[i] = wordMultiply(table[i], aWord);
+    }
+    return result;
+}
+
+/**
+ * 两个字在有限域GF(2)上的乘法操作
+ * multiplication between two words
+ * @param firstWord first operand
+ * @param secondWord second operand
+ * @return multiplication result, a byte actually
+ */
+private short wordMultiply(short[] firstWord, short[] secondWord) {
+    short result = 0;
+    for (int i=0; i < 4; i++) {
+        result ^= multiply(firstWord[i], secondWord[i]);
+    }
+    return result;
+}
+
+/**
+ * 有限域GF(2)上的乘法操作，通过分解操作数将之转化成有限域GF(2)上的倍乘操作
+ * multiplication in finite field GF(2^8)
+ * @param a an operand of this kind of multiplication
+ * @param b another operand of this kind of multiplication
+ * @return multiplication result
+ */
+private short multiply(short a, short b) {
+    short temp = 0;
+    while (b != 0) {
+        if ((b & 0x01) == 1) {
+            temp ^= a;
+        }
+        a <<= 1;
+        if ((a & 0x100) > 0) {
+            /*
+              judge if a is greater than 0x80, if then subtract a
+              irreducible polynomial which can be substituted by 0x1b
+              cause addition and subtraction are equivalent in this case
+              it's okay to xor 0x1b
+            */
+            a ^= 0x1b;
+        }
+        b >>= 1;
+    }
+    return (short) (temp & 0xff);
+}
+```
+
+
+
+
+
+## 解密过程
+
+### 对外的解密接口
+
+```java
+public String decrypt(String encryptedText, String key) {
+    short[][] initialTextState = transfer(Base64Util.decodeToShorts(encryptedText));
+    short[][] initialKeyState = transfer(transferToShorts(key));
+
+    short[][] decryptState = coreDecrypt(initialTextState, initialKeyState);
+    return getOrigin(decryptState);
+}
+```
+
+
+
+### 核心解密逻辑
+
+获取加密轮密钥逆变换数组，复用核心加密函数即可
+
+```java
+/**
+ * 解密逻辑：通过将可逆操作抽取成可逆矩阵, 复用加密核心函数
+ * @param encryptedTextState initial encrypted text state
+ * @param keyState initial key state
+ * @return decrypted state
+ */
+private short[][] coreDecrypt(short[][] encryptedTextState, short[][] keyState) {
+    // obtain raw round keys
+    short[][] rawRoundKeys = generateRoundKeys(keyState);
+
+    // make it easier to obtain a whole block of round key in a round transformation
+    short[][][] roundKeys = transfer(rawRoundKeys);
+
+    // 对中间9个密钥进行列混合变换
+    for (int i = 1; i < roundKeys.length - 1; i++) {
+        roundKeys[i] = mixColumns(roundKeys[i], AESConstants.INVERSE_CX);
+    }
+
+    short[][][] inverseRoundKeys = inverseRoundKeys(roundKeys);
+    return coreEncrypt(encryptedTextState, inverseRoundKeys, AESConstants.
+                       INVERSE_SUBSTITUTE_BOX, AESConstants.INVERSE_CX, AESConstants.INVERSE_SHIFTING_TABLE);
+}
+
+/**
+ * [解密] 将解密扩展密钥数组逆转，方便复用核心加密操作，
+ * @param roundKeys 解密扩展密钥数组
+ * @return 逆转了的解密扩展密钥数组
+ */
+private short[][][] inverseRoundKeys(short[][][] roundKeys) {
+    short[][][] result = new short[roundKeys.length][4][4];
+    int length = roundKeys.length;
+    for (int i = 0; i < roundKeys.length; i++) {
+        result[i] = roundKeys[length - 1 - i];
+    }
+    return result;
+}
+```
 
 
 
 ## 测试
 
 ```java
-  	@Test
-    public void testAES() {
-        short[] ptBytes = {
-                0x00, 0x01, 0x00, 0x01, 0x01, 0xa1, 0x98, 0xaf,
-                0xda, 0x78, 0x17, 0x34, 0x86, 0x15, 0x35, 0x66
-        };
+@Test
+public void testAES() throws UnsupportedEncodingException {
+    String plaintext = "passwordTextCase", key = "simpleKeyCase123";
+    CipherService aesService = new AESCipherService();
+    String encryptedText = aesService.encrypt(plaintext, key);
 
-        short[] keyBytes = {
-                0x00, 0x01, 0x20, 0x01, 0x71, 0x01, 0x98, 0xae,
-                0xda, 0x79, 0x17, 0x14, 0x60, 0x15, 0x35, 0x94
-        };
-        AESCipherService service = new AESCipherService();
-        service.coreOperation(ptBytes, keyBytes);
-    }
+    ArrayUtil.printInfo("encrypted text", encryptedText, false);
+    aesService.decrypt(encryptedText, key);
+}
 ```
 
-结果
+### 加密结果
 
 ```
-roundKeys: 
-00012001710198aeda79171460153594
-589702d129969a7ff3ef8d6b93fab8ff
-77fb140d5e6d8e72ad8203193e78bbe6
-cf119abf917c14cd3cfe17d40286ac32
-8380b9c812fcad052e02bad12c8416e3
-ccc7a8b9de3b05bcf039bf6ddcbda98e
-9614b13f482fb483b8160bee64aba260
-b42e617cfc01d5ff4417de1120bc7c71
-513ec2cbad3f1734e928c925c994b554
-68ebe216c5d4f5222cfc3c07e5688953
-1b4c0fcfde98faedf264c6ea170c4fb9
-0000200070a0000100010020e60000f2
+#####################  encryption  #####################
+plaintext text                passwordTextCase              
+key text                      simpleKeyCase123              
+initial plaintext state       70617373776f72645465787443617365
+initial key state             73696d706c654b657943617365313233
+
+RoundKeys
+[RoundKey 1]                  73696d706c654b657943617365313233
+[RoundKey 2]                  b54aae3dd92fe558a06c842bc55db618
+[RoundKey 3]                  fb04039b222be6c3824762e8471ad4f0
+[RoundKey 4]                  5d4c8f3b7f6769f8fd200b10ba3adfe0
+[RoundKey 5]                  d5d26ecfaab5073757950c27edafd3c7
+[RoundKey 6]                  bcb4a89a1601afad4194a38aac3b704d
+[RoundKey 7]                  7ee54b0b68e4e4a62970472c854b3761
+[RoundKey 8]                  8d7fa49ce59b403acceb071649a03077
+[RoundKey 9]                  ed7b51a708e0119dc40b168b8dab26fc
+[RoundKey 10]                 948ce1fa9c6cf0675867e6ecd5ccc010
+[RoundKey 11]                 e9362bf9755adb9e2d3d3d72f8f1fd62
+
 N = 1
-6363b76351e0637c637c63b78e636389
-63e06389517c63636363b77c8e6363b7
-1794c52f266f4e2aa81bf189765ae9fc
-4f03c7fe0ff9d4555bf47ce2e5a05103
+SubBytes                      7b30727baf67127cd8f7d4c5f75383b1
+ShiftRows                     7b67d4b1aff7837bd853727cf73012c5
+MixColumns                    3a636747bfbfc8685094ebaa7264b7b1
+RoundKey                      b54aae3dd92fe558a06c842bc55db618
+AddRoundKeys                  8f29c97a66902d30f0f86f81b73901a9
+
 N = 2
-847bc6bb769948fc39bf1098d9e0d17b
-8499107b76bfd1bb39e0c6fcd97b4898
-c8e6b0e85cc0a699734f518ef46f8168
-bf1da4e502ad28ebdecd5297ca173a8e
+SubBytes                      73a5ddda3360d8048c41a80ca9127cd3
+ShiftRows                     7360a8d333417cda8c12dd04a9a5d80c
+MixColumns                    3d8336e003efffc7ecd033486987b385
+RoundKey                      fb04039b222be6c3824762e8471ad4f0
+AddRoundKeys                  c687357b21c419046e9751a02e9d6775
+
 N = 3
-08a449d9779534e91dbd008874f08019
-0895001977bd80d91df049e974a43488
-ad20b6bf6b54a10d91d45f57a3f33b07
-62312c00fa28b5c0ad2a4883a1759735
+SubBytes                      b4179621fd1cd4f29f88d1e0315e859d
+ShiftRows                     b41cd19dfd8885219f5e96f23117d4e0
+MixColumns                    1b79ad2bc6430753a370fb8d6f98ae4b
+RoundKey                      5d4c8f3b7f6769f8fd200b10ba3adfe0
+AddRoundKeys                  46352210b9246eab5e50f09dd5a271ab
+
 N = 4
-aac771632d34d5ba95e552ec329d8896
-aa3452962de58863959d71ba32c7d5ec
-d7a29bb4851c66dc469d3f270f2f6b87
-5422227c97e0cbd9689f85f623ab7d64
+SubBytes                      5a9693ca56369f6258538c5e033aa362
+ShiftRows                     5a368c625653a3ca583a936203969f5e
+MixColumns                    00dbc99030c41d850fe0f98566d052b0
+RoundKey                      d5d26ecfaab5073757950c27edafd3c7
+AddRoundKeys                  d509a75f9a711ab25875f5a28b7f8177
+
 N = 5
-2093931088e11f3545db97422662ff43
-20e1974388dbff104562933526931f42
-ac183190922f86878a1a4554bf784d62
-60df99294c14833b7a23fa3963c5e4ec
+SubBytes                      03015ccfb8a3a2376a9de63a3dd20cf5
+ShiftRows                     03a3e6f5b89d0ccf6ad25c373d01a23a
+MixColumns                    eb9a73b1144277c7d206595ee1f82d90
+RoundKey                      bcb4a89a1601afad4194a38aac3b704d
+AddRoundKeys                  572edb2b0243d86a9392fad44dc35ddd
+
 N = 6
-d09eeea529faece2da262d12fba669ce
-d0fa2dce292669a5daa6eee2fb9eec12
-4d86393bf47b2965524686e2aae19040
-db928804bc549de6ea508d0cce4a3220
+SubBytes                      5b31b9f1771a6102dc4f2d48e32e4cc1
+ShiftRows                     5b1a2dc1774f4cf1dc2eb902e3316148
+MixColumns                    74d9434382cca8636a529deca76ac8fe
+RoundKey                      7ee54b0b68e4e4a62970472c854b3761
+AddRoundKeys                  0a3c0848ea284cc54322dac02221ff9f
+
 N = 7
-b94fc4f265205e8e87535dfe8bd623b7
-b9205db7655323f287d6c48e8b4f5efe
-e3a9e1d8ee547d203ee94b877c096170
-578780a41255a8df7afe95965cb51d01
+SubBytes                      67eb3052873429a61a9357ba93fd16db
+ShiftRows                     673457db879316521afd30a693eb29ba
+MixColumns                    1e2d8b67ffd2ceb3be0d76b4889fff03
+RoundKey                      8d7fa49ce59b403acceb071649a03077
+AddRoundKeys                  93522ffb1a498e8972e671a2c13fcf74
+
 N = 8
-5b17cd49c9fcc29edabb2a904ad5a47c
-5bfc2a7cc9bba449dad5cd9e4a17c290
-ffba77c3b21afacd98b9374affa96930
-ae84b5081f25edf97191fe6f363ddc64
+SubBytes                      dc00150fa23b19a7408ea33a78758a92
+ShiftRows                     dc3ba392a28e8a0f407515a77800193a
+MixColumns                    dfc617d8532f32e7ad32edf5d36904e5
+RoundKey                      ed7b51a708e0119dc40b168b8dab26fc
+AddRoundKeys                  32bd467f5bcf237a6939fb7e5ec22219
+
 N = 9
-e45fd530c03f5599a381bba805278643
-e43fbb43c0818630a327d599055f55a8
-6a0f7335b578063c7810852516ec134e
-02e4912370acf31e54ecb922f3849a1d
+SubBytes                      237a5ad2398a26daf9120ff3582593d4
+ShiftRows                     238a0fd4391293d2f9255ada587a26f3
+MixColumns                    18e9d05305617b7506871dc0eb356049
+RoundKey                      948ce1fa9c6cf0675867e6ecd5ccc010
+AddRoundKeys                  8c6531a9990d8b125ee0fb2c3ef9a059
+
 N = 10
-7769812651910d7220ce56930d5fb8a4
-779156a451ceb826205f81720d690d93
-6cdd596b8f5642cbd23b47981a65422a
+SubBytes                      644dc7d3eed73dc958e10f71b299e0cb
+ShiftRows                     64d70fcbeee1e0d35899c7c9b24d3d71
+RoundKey                      e9362bf9755adb9e2d3d3d72f8f1fd62
+AddRoundKeys                  8de124329bbb3b4d75a4fabb4abcc013
+encrypted text                jeEkMpu7O011pPq7SrzAEw==      
+```
+
+### 解密结果
+
+```
+#####################  decryption  #####################
+encrypted text                jeEkMpu7O011pPq7SrzAEw==      
+key text                      simpleKeyCase123              
+initial encrypted state       8de124329bbb3b4d75a4fabb4abcc013
+initial key state             73696d706c654b657943617365313233
+
+RoundKeys
+[RoundKey 1]                  73696d706c654b657943617365313233
+[RoundKey 2]                  b54aae3dd92fe558a06c842bc55db618
+[RoundKey 3]                  fb04039b222be6c3824762e8471ad4f0
+[RoundKey 4]                  5d4c8f3b7f6769f8fd200b10ba3adfe0
+[RoundKey 5]                  d5d26ecfaab5073757950c27edafd3c7
+[RoundKey 6]                  bcb4a89a1601afad4194a38aac3b704d
+[RoundKey 7]                  7ee54b0b68e4e4a62970472c854b3761
+[RoundKey 8]                  8d7fa49ce59b403acceb071649a03077
+[RoundKey 9]                  ed7b51a708e0119dc40b168b8dab26fc
+[RoundKey 10]                 948ce1fa9c6cf0675867e6ecd5ccc010
+[RoundKey 11]                 e9362bf9755adb9e2d3d3d72f8f1fd62
+
+inverse roundKeys
+[RoundKey 1]                  e9362bf9755adb9e2d3d3d72f8f1fd62
+[RoundKey 2]                  708e03febe111cd46ee2ba036852f407
+[RoundKey 3]                  513f2d23ce9f1f2ad0f3a6d706b04e04
+[RoundKey 4]                  16b3b0df9fa032091e6cb9fdd643e8d3
+[RoundKey 5]                  de6e462d891382d681cc8bf4c82f512e
+[RoundKey 6]                  0dc56d9f577dc4fb08df092249e3dada
+[RoundKey 7]                  e0240c6e5ab8a9645fa2cdd9413cd3f8
+[RoundKey 8]                  e0ec63caba9ca50a051a64bd1e9e1e21
+[RoundKey 9]                  a13297635a70c6c0bf86c1b71b847a9c
+[RoundKey 10]                 1d7fded0fb4251a3e5f60777a402bb2b
+[RoundKey 11]                 73696d706c654b657943617365313233
+
+N = 1
+SubBytes                      8c0dfb5999e0a0a95ef931123e658b2c
+ShiftRows                     8c6531a9990d8b125ee0fb2c3ef9a059
+MixColumns                    53040c2a87038f0697c7e0d93028d2f4
+RoundKey                      708e03febe111cd46ee2ba036852f407
+AddRoundKeys                  238a0fd4391293d2f9255ada587a26f3
+
+N = 2
+SubBytes                      32cffb195b39227f69c2467a5ebd237e
+ShiftRows                     32bd467f5bcf237a6939fb7e5ec22219
+MixColumns                    8d048eb16c1195259086b3707eb0573e
+RoundKey                      513f2d23ce9f1f2ad0f3a6d706b04e04
+AddRoundKeys                  dc3ba392a28e8a0f407515a77800193a
+
+N = 3
+SubBytes                      934971741ae6cffb723f2f89c1528ea2
+ShiftRows                     93522ffb1a498e8972e671a2c13fcf74
+MixColumns                    7187e7041833245b0491895b45a8c169
+RoundKey                      16b3b0df9fa032091e6cb9fdd643e8d3
+AddRoundKeys                  673457db879316521afd30a693eb29ba
+
+N = 4
+SubBytes                      0a28da9fea22ff48432108c5223c4cc0
+ShiftRows                     0a3c0848ea284cc54322dac02221ff9f
+MixColumns                    85746becfe5cce275de232f62b1e3066
+RoundKey                      de6e462d891382d681cc8bf4c82f512e
+AddRoundKeys                  5b1a2dc1774f4cf1dc2eb902e3316148
+
+N = 5
+SubBytes                      5743fadd02925d2b93c3db6a4d2ed8d4
+ShiftRows                     572edb2b0243d86a9392fad44dc35ddd
+MixColumns                    0e668b6aefe0c834620d551574e278e0
+RoundKey                      0dc56d9f577dc4fb08df092249e3dada
+AddRoundKeys                  03a3e6f5b89d0ccf6ad25c373d01a23a
+
+N = 6
+SubBytes                      d571f5779a75815f587fa7b28b091aa2
+ShiftRows                     d509a75f9a711ab25875f5a28b7f8177
+MixColumns                    ba12800c0ceb0aae07985ebb42aa4ca6
+RoundKey                      e0240c6e5ab8a9645fa2cdd9413cd3f8
+AddRoundKeys                  5a368c625653a3ca583a936203969f5e
+
+N = 7
+SubBytes                      4624f0abb95071105ea222abd5356e9d
+ShiftRows                     46352210b9246eab5e50f09dd5a271ab
+MixColumns                    54f0b2574714202b9a44f24f2f89cac1
+RoundKey                      e0ec63caba9ca50a051a64bd1e9e1e21
+AddRoundKeys                  b41cd19dfd8885219f5e96f23117d4e0
+
+N = 8
+SubBytes                      c6c451752197677b6e9d35042e8719a0
+ShiftRows                     c687357b21c419046e9751a02e9d6775
+MixColumns                    d2523fb06931ba1a33941cb3b221a290
+RoundKey                      a13297635a70c6c0bf86c1b71b847a9c
+AddRoundKeys                  7360a8d333417cda8c12dd04a9a5d80c
+
+N = 9
+SubBytes                      8f906fa966f8017af039c930b7292d81
+ShiftRows                     8f29c97a66902d30f0f86f81b73901a9
+MixColumns                    66180a6154b5d2d83da5750b5332a9ee
+RoundKey                      1d7fded0fb4251a3e5f60777a402bb2b
+AddRoundKeys                  7b67d4b1aff7837bd853727cf73012c5
+
+N = 10
+SubBytes                      030a19561b2641032d501e0126083907
+ShiftRows                     03081e031b0a39012d26190726504156
+RoundKey                      73696d706c654b657943617365313233
+AddRoundKeys                  70617373776f72645465787443617365
+plaintext                     passwordTextCase  
 ```
 
 

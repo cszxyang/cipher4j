@@ -6,13 +6,14 @@ Pure Implementations for encryption algorithms including DES, RSA, AES
 
 ## Usage
 
-Take DES Implementation for example
+Take AES Implementation for example
 
 ```java
-String plaintext = "01234567", key = "12345678";
-CipherService desService = new DESCipherService();
-String encryptedText = desService.encrypt(plaintext, key);
-desService.decrypt(encryptedText,key);
+String plaintext = "passwordTextCase", key = "simpleKeyCase123";
+CipherService aesService = new AESCipherService();
+
+String encryptedText = aesService.encrypt(plaintext, key);
+aesService.decrypt(encryptedText, key);
 ```
 
 
