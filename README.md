@@ -20,6 +20,6 @@ aesService.decrypt(encryptedText, key);
 
 ## Details
 
-- DES : [中文文档](https://github.com/jordonyang/cipher4j/tree/master/details/des_Zh.md)
+- DES : [中文文档](http://geekeye.cc/post/impl-of-des/)
 - AES : [中文文档](http://geekeye.cc/post/impl-of-aes/)
 
