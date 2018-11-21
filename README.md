@@ -281,6 +281,95 @@ convenient and fun offering with GUI
 The output of AES encryption and decryption process
 
 ```
+#####################  encryption  #####################
+plaintext text                passwordTextCase              
+key text                      simpleKeyCase123              
+initial plaintext state       70617373776f72645465787443617365
+initial key state             73696d706c654b657943617365313233
+
+RoundKeys
+[RoundKey 1]                  73696d706c654b657943617365313233
+[RoundKey 2]                  b54aae3dd92fe558a06c842bc55db618
+[RoundKey 3]                  fb04039b222be6c3824762e8471ad4f0
+[RoundKey 4]                  5d4c8f3b7f6769f8fd200b10ba3adfe0
+[RoundKey 5]                  d5d26ecfaab5073757950c27edafd3c7
+[RoundKey 6]                  bcb4a89a1601afad4194a38aac3b704d
+[RoundKey 7]                  7ee54b0b68e4e4a62970472c854b3761
+[RoundKey 8]                  8d7fa49ce59b403acceb071649a03077
+[RoundKey 9]                  ed7b51a708e0119dc40b168b8dab26fc
+[RoundKey 10]                 948ce1fa9c6cf0675867e6ecd5ccc010
+[RoundKey 11]                 e9362bf9755adb9e2d3d3d72f8f1fd62
+
+N = 1
+SubBytes                      7b30727baf67127cd8f7d4c5f75383b1
+ShiftRows                     7b67d4b1aff7837bd853727cf73012c5
+MixColumns                    3a636747bfbfc8685094ebaa7264b7b1
+RoundKey                      b54aae3dd92fe558a06c842bc55db618
+AddRoundKeys                  8f29c97a66902d30f0f86f81b73901a9
+
+N = 2
+SubBytes                      73a5ddda3360d8048c41a80ca9127cd3
+ShiftRows                     7360a8d333417cda8c12dd04a9a5d80c
+MixColumns                    3d8336e003efffc7ecd033486987b385
+RoundKey                      fb04039b222be6c3824762e8471ad4f0
+AddRoundKeys                  c687357b21c419046e9751a02e9d6775
+
+N = 3
+SubBytes                      b4179621fd1cd4f29f88d1e0315e859d
+ShiftRows                     b41cd19dfd8885219f5e96f23117d4e0
+MixColumns                    1b79ad2bc6430753a370fb8d6f98ae4b
+RoundKey                      5d4c8f3b7f6769f8fd200b10ba3adfe0
+AddRoundKeys                  46352210b9246eab5e50f09dd5a271ab
+
+N = 4
+SubBytes                      5a9693ca56369f6258538c5e033aa362
+ShiftRows                     5a368c625653a3ca583a936203969f5e
+MixColumns                    00dbc99030c41d850fe0f98566d052b0
+RoundKey                      d5d26ecfaab5073757950c27edafd3c7
+AddRoundKeys                  d509a75f9a711ab25875f5a28b7f8177
+
+N = 5
+SubBytes                      03015ccfb8a3a2376a9de63a3dd20cf5
+ShiftRows                     03a3e6f5b89d0ccf6ad25c373d01a23a
+MixColumns                    eb9a73b1144277c7d206595ee1f82d90
+RoundKey                      bcb4a89a1601afad4194a38aac3b704d
+AddRoundKeys                  572edb2b0243d86a9392fad44dc35ddd
+
+N = 6
+SubBytes                      5b31b9f1771a6102dc4f2d48e32e4cc1
+ShiftRows                     5b1a2dc1774f4cf1dc2eb902e3316148
+MixColumns                    74d9434382cca8636a529deca76ac8fe
+RoundKey                      7ee54b0b68e4e4a62970472c854b3761
+AddRoundKeys                  0a3c0848ea284cc54322dac02221ff9f
+
+N = 7
+SubBytes                      67eb3052873429a61a9357ba93fd16db
+ShiftRows                     673457db879316521afd30a693eb29ba
+MixColumns                    1e2d8b67ffd2ceb3be0d76b4889fff03
+RoundKey                      8d7fa49ce59b403acceb071649a03077
+AddRoundKeys                  93522ffb1a498e8972e671a2c13fcf74
+
+N = 8
+SubBytes                      dc00150fa23b19a7408ea33a78758a92
+ShiftRows                     dc3ba392a28e8a0f407515a77800193a
+MixColumns                    dfc617d8532f32e7ad32edf5d36904e5
+RoundKey                      ed7b51a708e0119dc40b168b8dab26fc
+AddRoundKeys                  32bd467f5bcf237a6939fb7e5ec22219
+
+N = 9
+SubBytes                      237a5ad2398a26daf9120ff3582593d4
+ShiftRows                     238a0fd4391293d2f9255ada587a26f3
+MixColumns                    18e9d05305617b7506871dc0eb356049
+RoundKey                      948ce1fa9c6cf0675867e6ecd5ccc010
+AddRoundKeys                  8c6531a9990d8b125ee0fb2c3ef9a059
+
+N = 10
+SubBytes                      644dc7d3eed73dc958e10f71b299e0cb
+ShiftRows                     64d70fcbeee1e0d35899c7c9b24d3d71
+RoundKey                      e9362bf9755adb9e2d3d3d72f8f1fd62
+AddRoundKeys                  8de124329bbb3b4d75a4fabb4abcc013
+encrypted text                jeEkMpu7O011pPq7SrzAEw==      
+
 #####################  decryption  #####################
 encrypted text                jeEkMpu7O011pPq7SrzAEw==      
 key text                      simpleKeyCase123              
