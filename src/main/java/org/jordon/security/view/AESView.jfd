@@ -1,0 +1,56 @@
+JFDML JFormDesigner: "6.0.4.1.172" Java: "1.8.0_152-release" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:21:p, par t {comp label1:::p::p, comp textArea1:::p::p, comp label2::t:p::p, comp label3:::p::p}, space s:::p, par l {comp keyField::::585:x, comp scrollPane1::::585:x, comp scrollPane2::l::585:x}, space :p:35:p}, seq t {space ::24:x, comp label4:::p:57:p, space :p:602:p}, seq l {space :p:19:p, comp processPanel:::p:644:p, space ::20:x}}"
+			"$verticalGroup": "par l {seq l {par l {seq {space :p:41:p, comp label1:::p::p}, seq {space :p:20:p, comp scrollPane1:::p:60:p}}, space :p:25:p, par b {comp label2::b:p::p, comp keyField::b:p::p}, par l {seq {space :p:52:p, comp label3:::p::p}, seq l {space :p:25:p, comp scrollPane2:::p:60:p}}, space :p:8:p, comp label4:::p::p, space u:::p, comp processPanel:::p:306:p, space :::p, comp textArea1:::p::p, space :::x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JTextArea" ) {
+				name: "textArea1"
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "ptArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "明文"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "密钥"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "keyField"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label3"
+				"text": "密文"
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane2"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "cipherArea"
+				} )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "processPanel"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "processArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label4"
+				"text": "详细过程"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 15, 0 )
+			"size": new java.awt.Dimension( 685, 605 )
+		} )
+	}
+}

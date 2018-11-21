@@ -1,13 +1,13 @@
 package org.jordon.security.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.math.BigInteger;
+import java.util.Arrays;
 
 public class ArrayUtil {
 
     /**
-     * 灏嗗瓧绗︿覆杞负涓�缁磗hort鏁扮粍
+     * 将字符串转为一维short数组
      * transfer a string to short array
      * @param string target string to be process
      * @return a short array
@@ -28,11 +28,13 @@ public class ArrayUtil {
      * @param value info
      * @param nextRow flag deciding whether going to next row
      */
-    public static void printInfo(String key, String value, boolean nextRow) {
-        System.out.println(String.format("%-30s%-30s", key, value));
+    public static String  printInfo(String key, String value, boolean nextRow) {
+        String message = String.format("%-30s%-70s", key, value);
         if (nextRow) {
-            System.out.println();
+            message += "\n";
         }
+        System.out.println(message);
+        return message;
     }
 
     /**
@@ -41,7 +43,7 @@ public class ArrayUtil {
      * @param after the second array in concat
      * @return concat
      */
-    static byte[] concat(byte[] before, byte[] after) {
+    public static byte[] concat(byte[] before, byte[] after) {
         byte[] result = new byte[before.length + after.length];
         System.arraycopy(before, 0, result, 0, before.length);
         System.arraycopy(after, 0, result, before.length, after.length);
@@ -53,7 +55,7 @@ public class ArrayUtil {
      * @param intValue int value
      * @return byte array
      */
-    static byte[] int2Bytes(int intValue) {
+    public static byte[] int2Bytes(int intValue) {
         byte[] byteArray = null;
         try {
             ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -70,16 +72,14 @@ public class ArrayUtil {
      * segment one-dimension array into an 8x8 array
      * transfer every byte unit into int
      * transfer int into ascii type  and print it
-     * @param prefix info
      * @param chars char array to be processed
      */
-    public static String segmentAndPrintChars(String prefix, char[] chars) {
-        char[][] chars1 = ArrayUtil.segmentDimension(chars, 8 ,8);
+    public static String segmentAndPrintChars(char[] chars) {
+        char[][] chars1 = ArrayUtil.segmentDimension(chars, chars.length / 8 ,8);
         StringBuilder builder = new StringBuilder();
         for (char[] aChars1 : chars1) {
             builder.append((char) Integer.parseInt(String.valueOf(aChars1), 2));
         }
-        System.out.println(String.format("%-30s%-30s", prefix, builder.toString()));
         return builder.toString();
     }
 
@@ -139,7 +139,7 @@ public class ArrayUtil {
      * @param prefix info
      * @param chars bits in chars format to be printed
      */
-    public static void printBitChars(String prefix, char[] chars) {
+    public static String printBitChars(String prefix, char[] chars) {
         int length = chars.length;
         StringBuilder builder = new StringBuilder();
         for (int i = 1; i <= length; i++) {
@@ -147,7 +147,9 @@ public class ArrayUtil {
                     ? " " : "";
             builder.append(chars[i - 1]).append(symbol);
         }
-        System.out.println(String.format("%-30s%-30s", prefix, builder.toString()));
+        String message = String.format("%-30s%-30s", prefix, builder.toString());
+        System.out.println(message);
+        return message;
     }
 
     /**
@@ -177,15 +179,27 @@ public class ArrayUtil {
 
     /**
      * xor operation
-     * @param a operating bits in chars format
-     * @param b operating bits in chars format
-     * @return result of operation, formatting in 48-bits
+     * @param aChars operating bits in chars format
+     * @param bChars operating bits in chars format
+     * @return result of operation, formatting in 48 or 64 bits
      */
-    public static char[] xor(char[] a, char[] b) {
-        long xorResult = Long.parseLong(String.valueOf(a), 2)
-                  ^ Long.parseLong(String.valueOf(b), 2);
-        return Long.toBinaryString((xorResult & Long.parseLong("ffffffffffff", 16))
-                + Long.parseLong("1000000000000", 16)).substring(1).toCharArray();
+    public static char[] xor(char[] aChars, char[] bChars, int bits) {
+        BigInteger a = new BigInteger(String.valueOf(aChars), 2);
+        BigInteger b = new BigInteger(String.valueOf(bChars), 2);
+
+        BigInteger xorResult = a.xor(b);
+
+        String xorStr = xorResult.toString(2);
+        StringBuilder builder = new StringBuilder();
+
+        int sub = bits - xorStr.length();
+        if (sub > 0) {
+            for (int i = 0; i < sub; i++) {
+                builder.append("0");
+            }
+            xorStr = builder.toString() + xorStr;
+        }
+        return xorStr.toCharArray();
     }
 
     /**
@@ -214,5 +228,45 @@ public class ArrayUtil {
     public static char[] concat(char[] before, char[] after) {
         return (String.valueOf(before) + String.valueOf(after))
                 .toCharArray();
+    }
+
+    /**
+     * 获取文件字节数组
+     * @param file 文件
+     * @return 字节数组
+     */
+    public static byte[] getBytes(File file){
+        byte[] buffer = null;
+        FileInputStream fis = null;
+        ByteArrayOutputStream bos = null;
+        try {
+            fis = new FileInputStream(file);
+            bos = new ByteArrayOutputStream(1000);
+            byte[] b = new byte[1000];
+            int n;
+            while ((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+            buffer = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (bos != null) {
+                    try {
+                        bos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return buffer;
     }
 }

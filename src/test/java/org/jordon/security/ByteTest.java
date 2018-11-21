@@ -20,7 +20,7 @@ public class ByteTest {
                     '1', '1', '0', '0', '0', '0',
                     '1', '1', '1', '0', '1', '1'};
 
-        char[] xorResult = ArrayUtil.xor(a, b);
+        char[] xorResult = ArrayUtil.xor(a, b, 48);
         ArrayUtil.printArray(xorResult);
         System.out.println(Arrays.deepToString(ArrayUtil.segmentDimension(b, 8, 6)));
     }

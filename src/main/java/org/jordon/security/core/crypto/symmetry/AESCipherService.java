@@ -1,6 +1,7 @@
-package org.jordon.security.core;
+package org.jordon.security.core.crypto.symmetry;
 
 import org.jordon.security.constant.AESConstants;
+import org.jordon.security.core.crypto.CipherService;
 import org.jordon.security.util.ArrayUtil;
 import org.jordon.security.util.Base64Util;
 
@@ -422,7 +423,7 @@ public class AESCipherService implements CipherService {
     }
 
     /**
-     * 状态数组的十六机制串
+     * 状态数组的十六进制串
      * obtain state array
      * @param state a state
      * @return hex string of state

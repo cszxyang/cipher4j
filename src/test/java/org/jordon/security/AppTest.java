@@ -2,8 +2,8 @@ package org.jordon.security;
 
 import static org.junit.Assert.assertTrue;
 
-import org.jordon.security.core.CipherService;
-import org.jordon.security.core.DESCipherService;
+import org.jordon.security.core.crypto.CipherService;
+import org.jordon.security.core.crypto.symmetry.DESCipherService;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -18,7 +18,7 @@ public class AppTest {
     @Test
     public void testService() {
         String plaintext = "01234567", key = "12345678";
-        CipherService cipherService = new DESCipherService();
+        CipherService cipherService = new DESCipherService(false);
         try {
             String encryptedText = cipherService.encrypt(plaintext, key);
             cipherService.decrypt(encryptedText,key);

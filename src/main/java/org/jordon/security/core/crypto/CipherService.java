@@ -1,4 +1,4 @@
-package org.jordon.security.core;
+package org.jordon.security.core.crypto;
 
 import java.io.UnsupportedEncodingException;
 

@@ -1,0 +1,87 @@
+JFDML JFormDesigner: "6.0.4.1.172" Java: "1.8.0_152-release" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {space ::20:x, par l {seq t {space :p:58:p, par t:::p {seq {comp label5:::p::p, space :p:46:p, comp padComboBox:::p:136:p, space :p:80:p, comp label6:::p:62:p, space :p:58:p}, seq t {space :p:83:p, comp chooserButton:::p:128:p, space :::x, comp encButton:::p:68:p, space :p:87:p}}, par l {comp workComboBox:::p:140:p, comp decButton:::p:68:p}, space :p:190:p}, seq {par l {comp processPanel:::p:790:p, comp processLabel:::p:57:p}, space :::x}}}, seq l {space :p:21:p, par t {comp label1:::p::p, comp textArea1:::p::p, comp label2::t:p::p, comp label3:::p::p}, space s:::p, par l {comp keyField::::740:x, comp scrollPane1::::740:x, comp scrollPane2::l::740:x}, space :p:35:p}}"
+			"$verticalGroup": "par l {seq l {par l {seq {space :p:41:p, comp label1:::p::p}, seq {space :p:20:p, comp scrollPane1:::p:60:p}}, space :p:25:p, par b {comp label2::b:p::p, comp keyField::b:p::p}, par l {seq {space :p:52:p, comp label3:::p::p}, seq l {space :p:25:p, comp scrollPane2:::p:60:p}}, space :p:24:p, par b {comp label5::b:p::p, comp label6::b:p::p, comp workComboBox::b:p::p, comp padComboBox::b:p::p}, space ::33:x, par b {comp decButton::b:p:33:p, comp encButton::b:p:33:p, comp chooserButton::b:p:33:p}, space :p:39:p, comp processLabel:::p::p, space :p:26:p, par l {seq {space :0:0:x, comp textArea1:::p::p, space :::x}, seq t {comp processPanel:::p:306:p, space :::p}}}}"
+		} ) {
+			name: "this"
+			"title": "DES-Jordon Yang"
+			add( new FormComponent( "javax.swing.JTextArea" ) {
+				name: "textArea1"
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "ptArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "明文"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "密钥"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "keyField"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label3"
+				"text": "密文"
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane2"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "cipherArea"
+				} )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "processPanel"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "processArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "processLabel"
+				"text": "详细过程"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "decButton"
+				"text": "解密"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "decButtonActionPerformed", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "encButton"
+				"text": "加密"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "encButtonActionPerformed", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "padComboBox"
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "workComboBox"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label5"
+				"text": "填充方式"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label6"
+				"text": "工作模式"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "chooserButton"
+				"text": "选择文件"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "encButtonActionPerformed", true ) )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "chooserButtonActionPerformed", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 15, 0 )
+			"size": new java.awt.Dimension( 840, 755 )
+		} )
+	}
+}
