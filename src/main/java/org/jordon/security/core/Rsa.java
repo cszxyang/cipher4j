@@ -25,7 +25,7 @@ public class Rsa {
 			e=Math.abs(r.nextInt((int)phi_n));
 		}while(e <= 1 ||e >= phi_n || MathUtil.gcd(e,phi_n) != 1);
 		System.out.println("e="+e);
-		//根据ed = 1(mod φ(n))，求出d，并对d保密
+		// 根据ed = 1(mod φ(n))，求出d，并对d保密
 		d = (int)MathUtil.congruenceEquation(e,1, phi_n);
 	}
 
@@ -70,8 +70,26 @@ public class Rsa {
 	public String decrypt(String cipherText) throws Exception {
 		char[] C=cipherText.toCharArray();
 		byte[] M=new byte[C.length];
-		for(int i=0;i<C.length;i++) M[i]=(byte)MathUtil.modExp(C[i],d,n);
+		for(int i=0;i<C.length;i++){
+			M[i] = (byte)MathUtil.modExp(C[i],d,n);
+			System.out.print((int) M[i] + " ");
+		}
 		String plainText=new String(M,"UTF-8");
 		return plainText;
 	}
+
+	public static void main(String[] args) throws Exception {
+		Rsa rsa = new Rsa(7, 11, 31);
+		rsa.decrypt(rsa.encrypt("aadsadfasgvfvbdfgvba"));
+	}
+
+	/*
+		p 7 q 11
+		eulerVal 60
+		Roots  x : 15 y :-29
+		d 31 e 31
+		97 97 100 115 97 100 102 97 115 103 118 102 118 98 100 102 103 118 98 97
+		20 20 23 38 20 23 25 20 38 26 41 25 41 21 23 25 26 41 21 20
+		&&)))
+	 */
 }

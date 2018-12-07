@@ -1,0 +1,84 @@
+JFDML JFormDesigner: "6.0.4.1.172" Java: "1.8.0_152-release" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {par l {seq l {space :p:24:p, par l {seq {comp label1:::p::p, space u:::p, comp eField:::p:648:p}, seq l {par l {comp label2::l:p::p, comp label3::l:p::p, comp label4::l:p::p, comp label5::l:p:42:p}, space u:::p, par l {comp scrollPane1:::p:647:p, comp scrollPane2:::p:647:p, comp scrollPane::l:p:647:p, comp scrollPane4::l:p:647:p}}}}, seq l {space :p:242:p, comp encButton:::p::p, space :p:119:p, comp decButton:::p::p}}, space ::38:x}}"
+			"$verticalGroup": "par l {seq l {space :p:18:p, par b {comp label1::b:p::p, comp eField::b:p::p}, space :p:30:p, par l {comp label2:::p::p, comp scrollPane1:::p:92:p}, space :p:34:p, par l {comp label3:::p::p, comp scrollPane2:::p:100:p}, par l {seq {space :p:38:p, comp label4:::p::p}, seq l {space :p:46:p, comp scrollPane:::p:100:p}}, space ::42:x, par l {comp label5:::p::p, comp scrollPane4:::p:100:p}, space :p:40:p, par b {comp decButton::b:p::p, comp encButton::b:p::p}, space :p:41:p}}"
+		} ) {
+			name: "this"
+			"title": "RSA - jordonyang"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "公钥e"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "eField"
+				"editable": false
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "私钥d"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "dArea"
+					"editable": false
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label3"
+				"text": "模n"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane2"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "nArea"
+					"editable": false
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label4"
+				"text": "明文"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "ptArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label5"
+				"text": "密文"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane4"
+				add( new FormComponent( "javax.swing.JTextArea" ) {
+					name: "cArea"
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "encButton"
+				"text": "加密"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "encButtonActionPerformed", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "decButton"
+				"text": "解密"
+				"font": new java.awt.Font( "Microsoft YaHei UI", 0, 16 )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "decButtonActionPerformed", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 10, 0 )
+			"size": new java.awt.Dimension( 765, 730 )
+		} )
+	}
+}

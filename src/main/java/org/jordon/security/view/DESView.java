@@ -6,16 +6,13 @@ package org.jordon.security.view;
 
 import org.jordon.security.core.crypto.symmetry.DESCipherService;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle;
 
 /**
  * @author Jordon
@@ -132,7 +129,8 @@ public class DESView extends JFrame {
         {
             scrollPane1.setViewportView(ptArea);
         }
-
+        ptArea.setLineWrap(true);  // 激活自动换行功能
+        ptArea.setWrapStyleWord(true);   // 激活断行不断字功能
         //---- label1 ----
         label1.setText("\u660e\u6587");
 
@@ -146,7 +144,8 @@ public class DESView extends JFrame {
         {
             scrollPane2.setViewportView(cipherArea);
         }
-
+        cipherArea.setLineWrap(true);  // 激活自动换行功能
+        cipherArea.setWrapStyleWord(true);   // 激活断行不断字功能
         //======== processPanel ========
         {
             processPanel.setViewportView(processArea);
@@ -239,11 +238,12 @@ public class DESView extends JFrame {
                     .addGroup(contentPaneLayout.createParallelGroup()
                         .addGroup(contentPaneLayout.createSequentialGroup()
                             .addGap(52, 52, 52)
-                            .addComponent(label3))
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addGap(25, 25, 25)
-                            .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)))
-                    .addGap(24, 24, 24)
+                            .addComponent(label3)
+                            .addGap(40, 40, 40))
+                        .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 76, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)))
                     .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(label5)
                         .addComponent(label6)
