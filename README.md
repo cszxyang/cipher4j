@@ -904,6 +904,6 @@ Simple GUI of RSA crypto
 
 - DES : [中文文档](http://geekeye.cc/post/impl-of-des/)
 - AES : [中文文档](http://geekeye.cc/post/impl-of-aes/)
-- RSA : [中文文档](http://localhost:1313/post/security/crypto/unsymmetry/rsa/)
-- RC4 : [中文文档](http://localhost:1313/post/security/crypto/symmetry/rc4/)
+- RSA : [中文文档](http://geekeye.cc/post/security/crypto/unsymmetry/rsa/)
+- RC4 : [中文文档](http://geekeye.cc/post/security/crypto/symmetry/rc4/)
 
