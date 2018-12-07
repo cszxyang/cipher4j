@@ -12,7 +12,7 @@ public class RawRSACipherServiceTest {
     @Test
     public void test() {
         RawRSACipherService service = new RawRSACipherService();
-        for (int i = 0; i < 30; i++) { // ½øÐÐ30´Î²âÊÔ
+        for (int i = 0; i < 30; i++) { // è¿›è¡Œ30æ¬¡æµ‹è¯•
             String example = genPlaintext();
             ArrayUtil.printInfo("example", example, false);
             String cipher = service.encrypt(example);
@@ -22,13 +22,13 @@ public class RawRSACipherServiceTest {
         }
     }
 
-    // Ëæ»úÉú³ÉÃ÷ÎÄÑùÀý
+    // éšæœºç”Ÿæˆæ˜Žæ–‡æ ·ä¾‹
     private String genPlaintext() {
-        // Ëæ»úÉú³Éº¬ÓÐ[1, 50]¸ö¿É´òÓ¡×Ö·ûµÄ×Ö·û´®
+        // éšæœºç”Ÿæˆå«æœ‰[1, 50]ä¸ªå¯æ‰“å°å­—ç¬¦çš„å­—ç¬¦ä¸²
         int count = random.nextInt(20) + 1;
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < count; i++) {
-            // ÔÚ¿É´òÓ¡×Ö·û·¶Î§ÄÚËæ»ú»ñÈ¡
+            // åœ¨å¯æ‰“å°å­—ç¬¦èŒƒå›´å†…éšæœºèŽ·å–
             int val = random.nextInt(126 -33) + 33;
             builder.append((char) val);
         }
