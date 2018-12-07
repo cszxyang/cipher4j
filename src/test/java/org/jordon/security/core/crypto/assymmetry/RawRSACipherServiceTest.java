@@ -1,1 +1,37 @@
-package org.jordon.security.core.crypto.assymmetry;import org.jordon.security.util.ArrayUtil;import org.junit.Test;import java.util.Random;import java.util.concurrent.ThreadLocalRandom;public class RawRSACipherServiceTest {    private Random random = ThreadLocalRandom.current();    @Test    public void test() {        RawRSACipherService service = new RawRSACipherService();        for (int i = 0; i < 30; i++) { // è¿›è¡Œ30æ¬¡æµ‹è¯•            String example = genPlaintext();            ArrayUtil.printInfo("example", example, false);            String cipher = service.encrypt(example);            ArrayUtil.printInfo("cipher", cipher, false);            String plaintext = service.decrypt(cipher);            ArrayUtil.printInfo("plaintext", plaintext, true);        }    }    // éšæœºç”Ÿæˆæ˜Žæ–‡æ ·ä¾‹    private String genPlaintext() {        // éšæœºç”Ÿæˆå«æœ‰[1, 50]ä¸ªå¯æ‰“å°å­—ç¬¦çš„å­—ç¬¦ä¸²        int count = random.nextInt(20) + 1;        StringBuilder builder = new StringBuilder();        for (int i = 0; i < count; i++) {            // åœ¨å¯æ‰“å°å­—ç¬¦èŒƒå›´å†…éšæœºèŽ·å–            int val = random.nextInt(126 -33) + 33;            builder.append((char) val);        }        return builder.toString();    }}
+package org.jordon.security.core.crypto.assymmetry;
+
+import org.jordon.security.util.ArrayUtil;
+import org.junit.Test;
+
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class RawRSACipherServiceTest {
+    private Random random = ThreadLocalRandom.current();
+
+    @Test
+    public void test() {
+        RawRSACipherService service = new RawRSACipherService();
+        for (int i = 0; i < 30; i++) { // ½øÐÐ30´Î²âÊÔ
+            String example = genPlaintext();
+            ArrayUtil.printInfo("example", example, false);
+            String cipher = service.encrypt(example);
+            ArrayUtil.printInfo("cipher", cipher, false);
+            String plaintext = service.decrypt(cipher);
+            ArrayUtil.printInfo("plaintext", plaintext, true);
+        }
+    }
+
+    // Ëæ»úÉú³ÉÃ÷ÎÄÑùÀý
+    private String genPlaintext() {
+        // Ëæ»úÉú³Éº¬ÓÐ[1, 50]¸ö¿É´òÓ¡×Ö·ûµÄ×Ö·û´®
+        int count = random.nextInt(20) + 1;
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            // ÔÚ¿É´òÓ¡×Ö·û·¶Î§ÄÚËæ»ú»ñÈ¡
+            int val = random.nextInt(126 -33) + 33;
+            builder.append((char) val);
+        }
+        return builder.toString();
+    }
+}
