@@ -516,12 +516,9 @@ decrypt plaintext text        01234567
 
 convenient and fun offering with GUI
 
-​                                (![img](https://raw.githubusercontent.com/jordonyang/jordonyang.github.io/master/images/sec/des//desView5.png))
+<div align="center"> <img src="./images/sec/des//desView5.png" width="500px"> </div><br>
 
- ![img](https://raw.githubusercontent.com/jordonyang/jordonyang.github.io/master/images/sec/des//desView4.png)
-
-
-
+<div align="center"> <img src="./images/sec/des//desView4.png" width="500px"> </div><br>
 
 
 ### AES
@@ -722,7 +719,6 @@ plaintext                     passwordTextCase
 ```
 
 
-
 ### DES Differential Cryptanalysis
 
 ```java
@@ -898,7 +894,8 @@ decrypted = 64817416795314078589627041975736817397997584028795185521897274181295
 
 Simple GUI of RSA crypto
 
-![img](https://pic-1254257477.cos.ap-chengdu.myqcloud.com/RSA/rsa-gui.png)
+<div align="center"> <img src="https://pic-1254257477.cos.ap-chengdu.myqcloud.com/RSA/rsa-gui.png" width="500px"> </div><br>
+
 
 ## Details
 
