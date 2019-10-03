@@ -518,7 +518,7 @@ convenient and fun offering with GUI
 
 <div align="center"> <img src="./imgs/des//desView5.png" width="500px"> </div><br>
 
-<div align="center"> <img src="./imgs/sec/des//desView4.png" width="500px"> </div><br>
+<div align="center"> <img src="./imgs/des//desView4.png" width="500px"> </div><br>
 
 
 ### AES
